@@ -74,12 +74,22 @@ def logout():
     return redirect(url_for('main.login'))
 
 # Dashboard route (protected)
-@bp.route('/dashboard/<username>')
-def dashboard(username):
-    if 'user_id' not in session or session.get('username') != username:
+@bp.route('/dashboard')
+def dashboard():
+    # Assume user is loaded from session
+    user = User.query.filter_by(id=session.get('user_id')).first()
+    if not user:
         return redirect(url_for('main.login'))
-    user = User.query.filter_by(username=username).first()
-    return render_template('dashboard.html', user=user)
+    # Count active referrals
+    referral_count = user.referrals.filter_by(is_active=True).count()
+    # Example: get user's package and daily payout
+    package = Package.query.filter_by(id=user.package_id).first() if user.package_id else None
+    daily_earning = (package.daily_payment_amount if package else 0) * referral_count
+    weekly_earning = daily_earning * 7
+    monthly_earning = daily_earning * 30
+    yearly_earning = daily_earning * 365
+    total_earned = 0  # You can sum Payment records for this user if you track payouts
+    return render_template('dashboard.html', user=user, referral_count=referral_count, daily_earning=daily_earning, weekly_earning=weekly_earning, monthly_earning=monthly_earning, yearly_earning=yearly_earning, total_earned=total_earned)
 # Password reset route
 @bp.route('/reset-password', methods=['GET', 'POST'])
 def reset_password():
@@ -125,8 +135,6 @@ def send_resend_email(to_email, subject, body_text, from_email="noreply@admin.se
     except Exception as e:
         print(f"Resend email failed: {e}")
         return False
-
- # ...existing code...
 
 # Root route for health check or homepage
 @bp.route('/')
@@ -326,3 +334,14 @@ def activate_daily(user_id):
             return jsonify({'message': 'Daily payments activated'})
         return jsonify({'message': 'Already active'})
     return jsonify({'message': 'Not enough paid referrals', 'paid_count': paid_count})
+
+@bp.route('/affiliate-earnings')
+def affiliate_earnings():
+    # Example membership levels and daily payout rates
+    levels = [
+        {'name': 'Starter', 'daily': 2},
+        {'name': 'Pro', 'daily': 5},
+        {'name': 'Elite', 'daily': 10}
+    ]
+    ref_counts = [3, 5, 10, 15, 20, 50]
+    return render_template('affiliate_earnings.html', levels=levels, ref_counts=ref_counts)

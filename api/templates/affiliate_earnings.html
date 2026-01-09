@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Affiliate Earnings Table</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; margin: 30px 0; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        th { background: #e60000; color: #fff; }
+        tr:nth-child(even) { background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h2>Affiliate Daily Earnings Table</h2>
+    <table>
+        <tr>
+            <th>Membership Level</th>
+            <th>Referrals</th>
+            <th>Daily</th>
+            <th>Weekly</th>
+            <th>Monthly</th>
+            <th>Yearly</th>
+        </tr>
+        <!-- Example values, replace with your actual package names and payout rates -->
+        {% for level in levels %}
+            {% for ref_count in ref_counts %}
+            <tr>
+                <td>{{ level.name }}</td>
+                <td>{{ ref_count }}</td>
+                <td>${{ level.daily * ref_count }}</td>
+                <td>${{ level.daily * ref_count * 7 }}</td>
+                <td>${{ level.daily * ref_count * 30 }}</td>
+                <td>${{ level.daily * ref_count * 365 }}</td>
+            </tr>
+            {% endfor %}
+        {% endfor %}
+    </table>
+</body>
+</html>
